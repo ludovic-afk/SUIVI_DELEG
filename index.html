@@ -1,0 +1,1256 @@
+Tu es un développeur web senior spécialisé dans :
+
+- les applications métiers ;
+- l’ergonomie des formulaires complexes ;
+- l’accessibilité numérique ;
+- le traitement de données en JavaScript ;
+- la génération de fichiers Excel ;
+- les applications statiques déployées avec GitHub Pages.
+
+Ta mission est de créer une application web complète, fonctionnelle et immédiatement déployable sur GitHub Pages.
+
+L’application doit permettre aux délégations d’APF France handicap de saisir simplement leurs données de suivi d’activité, sans avoir à ouvrir, importer ou remplir directement un fichier Excel complexe.
+
+==================================================
+1. CONTEXTE ET OBJECTIF
+==================================================
+
+Le suivi actuel repose sur un tableau Excel comprenant 26 colonnes.
+
+Cette organisation rend la saisie :
+
+- longue ;
+- peu ergonomique ;
+- difficile à comprendre ;
+- source d’erreurs ;
+- peu adaptée aux utilisateurs occasionnels ;
+- difficile à utiliser sur un petit écran.
+
+L’objectif est de remplacer la saisie directe dans Excel par une application web simple, progressive, accessible et ludique.
+
+L’utilisateur doit renseigner directement les éléments sur la page HTML au moyen d’un formulaire guidé.
+
+PRINCIPE IMPÉRATIF :
+
+- l’utilisateur ne doit importer aucun fichier Excel ;
+- l’utilisateur ne doit pas manipuler le tableau Excel source ;
+- l’utilisateur ne doit pas voir les 26 colonnes sur un seul écran ;
+- l’utilisateur ne doit pas saisir manuellement les codes techniques lorsqu’ils peuvent être déterminés automatiquement ;
+- toutes les valeurs de référence doivent être intégrées dans l’application ;
+- le fichier Excel ne doit être généré qu’au moment de l’export ;
+- l’application doit transformer automatiquement les réponses de l’utilisateur en lignes conformes au format Excel attendu.
+
+L’application web est donc l’outil principal de saisie.
+
+Le fichier Excel est uniquement un format de restitution et d’export.
+
+==================================================
+2. CONTRAINTES TECHNIQUES
+==================================================
+
+Créer une application statique compatible avec GitHub Pages.
+
+Technologies attendues :
+
+- HTML5 ;
+- CSS3 ;
+- JavaScript vanilla ;
+- bibliothèque SheetJS, xlsx, pour générer les exports Excel ;
+- bibliothèque Chart.js facultative pour les graphiques ;
+- localStorage pour enregistrer les données dans le navigateur.
+
+Contraintes :
+
+- aucune base de données ;
+- aucun serveur ;
+- aucun compte utilisateur ;
+- aucune authentification ;
+- aucune API obligatoire ;
+- aucune clé API ;
+- aucun framework lourd ;
+- aucune donnée transmise à un serveur ;
+- aucun outil d’analyse d’audience ;
+- aucun cookie publicitaire ;
+- aucun fichier Excel à importer ;
+- l’application doit fonctionner directement dans le navigateur ;
+- l’application doit pouvoir fonctionner après publication sur GitHub Pages.
+
+Ne jamais présenter localStorage comme une base de données partagée.
+
+Ne jamais prétendre qu’une page statique GitHub Pages peut alimenter automatiquement un fichier Excel partagé, SharePoint ou Microsoft Lists sans API, authentification ou service complémentaire.
+
+==================================================
+3. PARCOURS UTILISATEUR
+==================================================
+
+Le parcours principal doit être :
+
+1. Accueil
+2. Nouvelle saisie
+3. Sélection de l’activité
+4. Identification de la délégation et du mois
+5. Saisie des caractéristiques
+6. Saisie des indicateurs
+7. Description
+8. Vérification
+9. Enregistrement local
+10. Consultation du tableau de bord
+11. Export Excel
+
+L’application doit proposer un assistant de saisie avec :
+
+- une seule étape visible à la fois ;
+- une barre de progression ;
+- des boutons « Précédent » et « Suivant » ;
+- une sauvegarde automatique du brouillon ;
+- des aides contextuelles ;
+- un écran récapitulatif avant validation.
+
+Ne jamais afficher les 26 champs simultanément.
+
+==================================================
+4. ÉCRAN D’ACCUEIL
+==================================================
+
+Créer un écran d’accueil intitulé :
+
+« Suivi des actions associatives »
+
+Ajouter un sous-titre :
+
+« Saisissez simplement les activités réalisées par votre délégation. Les données seront automatiquement préparées pour l’export Excel. »
+
+Présenter quatre actions principales sous forme de grandes cartes :
+
+1. Nouvelle action
+2. Mes saisies
+3. Tableau de bord
+4. Exporter les données
+
+Afficher également :
+
+- le nombre d’actions validées ;
+- le nombre de brouillons ;
+- la date de la dernière saisie ;
+- la délégation sélectionnée, si elle a déjà été mémorisée ;
+- un message indiquant que les données sont enregistrées localement sur l’appareil.
+
+Ajouter un encadré d’information :
+
+« Aucune donnée n’est transmise en ligne. Les saisies sont conservées dans le navigateur jusqu’à leur export ou leur suppression. »
+
+==================================================
+5. RÉFÉRENTIELS INTÉGRÉS
+==================================================
+
+Toutes les données de référence doivent être intégrées dans des fichiers JavaScript configurables.
+
+Créer notamment :
+
+- delegations.js ;
+- actions.js ;
+- config.js.
+
+Les correspondances ne doivent pas être écrites directement dans le HTML.
+
+Le fichier delegations.js doit contenir les correspondances entre les délégations et leurs codes établissements.
+
+Prévoir notamment les délégations suivantes :
+
+- Deux-Savoie, code DARA73 ;
+- Cantal, Loire, Haute-Loire, code DARA15 ;
+- Drôme Ardèche, code DARA07 ;
+- Isérois, code DARA38 ;
+- Nord Auvergne, code DARA03 ;
+- Rhône-Ain, code DARA01.
+
+La structure doit permettre d’ajouter facilement d’autres délégations.
+
+Exemple de structure attendue :
+
+const DELEGATIONS = [
+  {
+    codeEtablissement: "DARA73",
+    nom: "Deux-Savoie",
+    region: "Auvergne-Rhône-Alpes"
+  }
+];
+
+Le fichier actions.js doit contenir, pour chaque activité :
+
+- identifiant unique ;
+- code analytique ;
+- catégorie d’action ;
+- nom de l’action ;
+- libellé simplifié pour l’utilisateur ;
+- mots-clés de recherche ;
+- mission sociale par défaut ;
+- mission politique par défaut ;
+- mission associative par défaut ;
+- valeur du champ « Gérer » ;
+- valeur du champ « TVA ? » ;
+- projet expérimental par défaut ;
+- projet clé en main par défaut ;
+- frais indirects par défaut ;
+- champs éventuellement obligatoires ;
+- aide contextuelle ;
+- statut actif ou inactif.
+
+Exemple de structure attendue :
+
+const ACTIONS = [
+  {
+    id: "sensibilisation-scolaire-1",
+    codeAnalytique: "T1SENSI_SCOLAIR",
+    categorie: "Sensibilisation",
+    nomAction: "Sensibilisations scolaires - 1",
+    libelleUtilisateur: "Sensibilisation scolaire",
+    motsCles: [
+      "école",
+      "scolaire",
+      "sensibilisation",
+      "handicap"
+    ],
+    missions: {
+      sociale: 0,
+      politique: 1,
+      associative: 0
+    },
+    gerer: "oui",
+    tva: "",
+    projetExperimental: "",
+    projetCleEnMain: "",
+    fraisIndirects: "",
+    actif: true
+  }
+];
+
+Si une valeur du référentiel n’est pas certaine, ne pas l’inventer.
+
+Dans ce cas :
+
+- laisser une valeur vide ;
+- ajouter un commentaire « À valider » ;
+- centraliser cette valeur dans config.js ;
+- permettre sa modification sans toucher à la logique de l’application.
+
+==================================================
+6. PREMIÈRE ÉTAPE : QUE VENEZ-VOUS DE FAIRE ?
+==================================================
+
+La première question affichée doit être :
+
+« Que venez-vous de faire ? »
+
+Présenter de grandes cartes correspondant aux grandes familles d’activité, par exemple :
+
+- Sensibiliser
+- Accompagner
+- Revendiquer
+- Animer
+- Former
+- Mobiliser
+- Collecter des ressources
+- Faire vivre la vie associative
+- Autre activité
+
+Chaque carte doit :
+
+- être accessible au clavier ;
+- comporter un libellé explicite ;
+- comporter une courte description ;
+- filtrer les activités compatibles.
+
+Après sélection d’une famille, afficher une liste d’activités disponibles.
+
+Ajouter une barre de recherche avec autocomplétion :
+
+« Rechercher une activité »
+
+La recherche doit fonctionner sur :
+
+- le nom complet ;
+- le libellé simplifié ;
+- la catégorie ;
+- les mots-clés ;
+- le code analytique, uniquement pour les utilisateurs qui le connaissent.
+
+Présenter les activités comme des cartes ou une liste facile à lire.
+
+Exemples d’activités :
+
+- Festi’Run ;
+- Sensibilisation d’organisations ;
+- Sensibilisation d’organisations avec Livegame ;
+- Sensibilisation scolaire ;
+- Handi-Droits ;
+- Représentation en commission accessibilité ;
+- Mobilisation ou manifestation ;
+- Atelier culturel ;
+- Atelier ou groupe collectif ;
+- Boutique solidaire ;
+- Bus solidaire ;
+- GEM ;
+- Sports, santé et bien-être ;
+- Formation des élus et des bénévoles ;
+- Faire vivre les instances ;
+- Actions ressources ponctuelles ;
+- Dotation territoriale annuelle.
+
+Lorsqu’une activité est sélectionnée, remplir automatiquement :
+
+- le code analytique ;
+- la catégorie d’action ;
+- le nom officiel de l’action ;
+- les valeurs de mission proposées ;
+- les caractéristiques techniques disponibles.
+
+Les codes techniques ne doivent pas être demandés à l’utilisateur.
+
+Ils peuvent être affichés dans le récapitulatif final dans une rubrique repliable intitulée :
+
+« Informations techniques destinées à l’export »
+
+Prévoir une option :
+
+« Je ne trouve pas mon activité »
+
+Cette option doit :
+
+- permettre de chercher à nouveau ;
+- proposer une catégorie « Autre » si elle existe dans le référentiel ;
+- avertir l’utilisateur si aucun code analytique fiable ne peut être attribué ;
+- empêcher l’invention automatique d’un code analytique.
+
+==================================================
+7. DEUXIÈME ÉTAPE : OÙ ET QUAND ?
+==================================================
+
+Afficher :
+
+- Délégation ;
+- Mois.
+
+La délégation doit être choisie dans une liste.
+
+Lorsqu’une délégation est sélectionnée :
+
+- remplir automatiquement le code établissement ;
+- mémoriser la délégation sur l’appareil si l’utilisateur l’autorise ;
+- ne pas demander la saisie manuelle du code établissement.
+
+Proposer les mois suivants :
+
+- Janvier
+- Février
+- Mars
+- Avril
+- Mai
+- Juin
+- Juillet
+- Août
+- Septembre
+- Octobre
+- Novembre
+- Décembre
+
+Le mois doit être obligatoire.
+
+Le code établissement doit rester modifiable uniquement dans un éventuel mode administrateur local, désactivé par défaut.
+
+==================================================
+8. TROISIÈME ÉTAPE : CARACTÉRISTIQUES
+==================================================
+
+Afficher les caractéristiques de l’action sous forme de boutons, interrupteurs ou listes courtes :
+
+- Action à gérer ;
+- Soumise à TVA ;
+- Projet expérimental ;
+- Projet clé en main ;
+- Frais indirects ;
+- Reconduction de l’action.
+
+Préremplir les valeurs connues depuis le référentiel des activités.
+
+Afficher les informations techniques dans une section simple et compréhensible.
+
+Utiliser uniquement les valeurs attendues dans l’export :
+
+- « oui » ;
+- « non » ;
+- cellule vide ;
+- nombre ou taux configuré.
+
+Ne pas exporter les valeurs techniques suivantes :
+
+- true ;
+- false ;
+- undefined ;
+- null ;
+- NaN.
+
+Pour les questions oui/non, utiliser des boutons clairement identifiables et accessibles.
+
+Ne pas forcer l’utilisateur à répondre si la règle métier autorise une cellule vide.
+
+==================================================
+9. QUATRIÈME ÉTAPE : MISSION DE L’ACTION
+==================================================
+
+Présenter les trois missions sous forme de grandes cartes.
+
+MISSION SOCIALE
+
+« Soutenir la citoyenneté des personnes et de leur famille, dans l’accès aux droits sociaux, civiques et politiques et dans la participation à la société. »
+
+MISSION POLITIQUE
+
+« Construire une société inclusive. »
+
+MISSION ASSOCIATIVE
+
+« Animer la vie associative et soutenir l’engagement. »
+
+Les réponses doivent alimenter les colonnes :
+
+- SOCIALE ;
+- POLITIQUE ;
+- ASSOCIATIVE.
+
+Si la répartition est déjà définie dans le référentiel de l’activité :
+
+- la proposer automatiquement ;
+- l’expliquer simplement ;
+- autoriser sa modification si cette possibilité est activée dans config.js.
+
+Présenter les valeurs à l’utilisateur sous forme de pourcentages.
+
+Exemples :
+
+- 100 % sociale ;
+- 100 % politique ;
+- 100 % associative ;
+- 50 % sociale et 50 % politique ;
+- autre répartition.
+
+Dans l’export Excel, convertir les pourcentages en valeurs décimales.
+
+Règles obligatoires :
+
+- la somme doit être exactement égale à 1 ;
+- les valeurs doivent être supérieures ou égales à 0 ;
+- éviter les imprécisions telles que 0.99999999999999989 ;
+- éviter les valeurs résiduelles telles que 1.1102230246251565E-16 ;
+- arrondir proprement les valeurs ;
+- ajuster la dernière valeur pour garantir une somme exactement égale à 1 ;
+- si une mission représente 100 %, exporter 1 ;
+- si une mission ne représente rien, exporter 0.
+
+==================================================
+10. CINQUIÈME ÉTAPE : PERSONNES TOUCHÉES
+==================================================
+
+Afficher un écran intitulé :
+
+« Qui a participé ou a été touché par l’action ? »
+
+Créer des champs numériques suffisamment grands pour :
+
+- Nombre d’adhérents, personnes en situation de handicap ;
+- Nombre de proches ;
+- Nombre de participations ;
+- Public : estimation du nombre de personnes ;
+- Total d’heures bénéficiaires.
+
+Pour chaque champ :
+
+- afficher une explication simple ;
+- proposer un exemple ;
+- accepter uniquement les nombres supérieurs ou égaux à zéro ;
+- distinguer zéro d’un champ laissé vide ;
+- ne jamais transformer automatiquement une valeur vide en zéro ;
+- afficher un message clair en cas d’erreur.
+
+Ajouter une aide permettant de distinguer :
+
+- le nombre de personnes différentes ;
+- le nombre total de participations ;
+- une estimation du public.
+
+Ne pas effectuer de calcul automatique lorsque la règle métier n’est pas certaine.
+
+==================================================
+11. SIXIÈME ÉTAPE : ENGAGEMENT HUMAIN
+==================================================
+
+Afficher un écran intitulé :
+
+« Quels moyens humains ont été mobilisés ? »
+
+Ajouter les champs :
+
+- Nombre de sessions menées ;
+- Nombre d’heures salariées ;
+- Nombre d’heures de bénévolat.
+
+Contraintes :
+
+- valeurs numériques uniquement ;
+- aucune valeur négative ;
+- zéro autorisé ;
+- décimales autorisées pour les heures si nécessaire ;
+- message d’aide pour préciser que les heures doivent être cumulées sur l’action déclarée.
+
+Afficher éventuellement, à titre informatif :
+
+« Total des heures d’engagement »
+
+Ce total correspond à :
+
+Nombre d’heures salariées + Nombre d’heures de bénévolat.
+
+Ce total d’affichage ne doit pas remplacer les deux colonnes d’origine dans l’export Excel.
+
+==================================================
+12. SEPTIÈME ÉTAPE : IMPACT DE L’ACTION
+==================================================
+
+Afficher un écran intitulé :
+
+« Quel a été l’impact de l’action ? »
+
+Ajouter les champs :
+
+- Nombre de partenaires ;
+- Nombre de retombées médiatiques ;
+- Reconduction prévue de l’action : oui, non ou non déterminé.
+
+Ajouter des aides contextuelles.
+
+Exemples à présenter comme illustrations et non comme règles automatiques :
+
+- une association partenaire ;
+- une collectivité partenaire ;
+- un établissement partenaire ;
+- un article de presse ;
+- une diffusion radio ;
+- un reportage ;
+- une publication média identifiée.
+
+Les valeurs doivent être numériques et supérieures ou égales à zéro.
+
+==================================================
+13. HUITIÈME ÉTAPE : DESCRIPTION
+==================================================
+
+Afficher un champ :
+
+« Décrivez brièvement l’action »
+
+Ce champ alimente la colonne :
+
+« Déscriptif / Commentaires »
+
+Ajouter les questions d’aide suivantes :
+
+- Quel était l’objectif de l’action ?
+- Quel public était concerné ?
+- Quels partenaires ont participé ?
+- Quels résultats ou faits marquants souhaitez-vous signaler ?
+
+Le champ doit :
+
+- être multiligne ;
+- accepter les accents ;
+- accepter les retours à la ligne ;
+- comporter une limite configurable ;
+- afficher le nombre de caractères ;
+- nettoyer le contenu avant affichage ;
+- ne jamais interpréter le contenu saisi comme du HTML.
+
+==================================================
+14. NEUVIÈME ÉTAPE : VÉRIFICATION
+==================================================
+
+Afficher un récapitulatif lisible organisé par rubriques :
+
+- Activité ;
+- Lieu et période ;
+- Caractéristiques ;
+- Mission ;
+- Personnes touchées ;
+- Engagement humain ;
+- Impact ;
+- Description.
+
+Afficher les données sous forme de phrases ou de cartes et non sous forme d’un tableau de 26 colonnes.
+
+Ajouter une section repliable :
+
+« Voir les informations techniques destinées à l’export »
+
+Cette section peut afficher :
+
+- code établissement ;
+- code analytique ;
+- catégorie officielle ;
+- nom officiel de l’action ;
+- valeurs SOCIALE, POLITIQUE et ASSOCIATIVE ;
+- autres valeurs techniques calculées.
+
+Afficher clairement :
+
+- les champs obligatoires manquants ;
+- les incohérences ;
+- les avertissements ;
+- les doublons potentiels ;
+- les données calculées automatiquement.
+
+Ajouter les boutons :
+
+- Modifier ;
+- Enregistrer comme brouillon ;
+- Valider l’action ;
+- Valider et saisir une nouvelle action ;
+- Annuler.
+
+==================================================
+15. DONNÉES À PRODUIRE
+==================================================
+
+Chaque action validée doit être convertie en un objet comportant exactement les champs suivants, dans cet ordre :
+
+1. Code Etablissement
+2. Code Analytique
+3. Catégorie d'action
+4. Nom de l'action
+5. SOCIALE
+6. POLITIQUE
+7. ASSOCIATIVE
+8. Gérer
+9. TVA ?
+10. Projet expérimental ?
+11. Projet Clé en main ?
+12. Frais indirects
+13. Mois
+14. Delegation
+15. Nombre d'adhérents (PSH ?)
+16. Nombre de proches
+17. Nombre de participations
+18. Public : estimation nombre de personnes
+19. Nombre de sessions menées
+20. Nombre heures salariées
+21. Nombre heures bénévolat
+22. Reconduction de l'action oui/non
+23. Nombre de partenaires
+24. Nombre de retombées médiatiques
+25. Total H bénéficiaires
+26. Déscriptif / Commentaires
+
+Respecter exactement :
+
+- l’orthographe ;
+- les accents ;
+- les apostrophes ;
+- les majuscules ;
+- les espaces ;
+- l’ordre des colonnes.
+
+Ne jamais renommer une colonne dans l’export.
+
+Prévoir dans config.js une constante unique contenant l’ordre officiel des colonnes.
+
+==================================================
+16. GESTION DES BROUILLONS ET DES SAISIES
+==================================================
+
+Utiliser localStorage pour enregistrer :
+
+- les brouillons ;
+- les actions validées ;
+- les préférences ;
+- la délégation habituelle ;
+- la date de dernière modification.
+
+Chaque saisie doit recevoir :
+
+- un identifiant local unique ;
+- un statut ;
+- une date de création ;
+- une date de modification ;
+- une version du schéma de données.
+
+Statuts possibles :
+
+- brouillon ;
+- validé ;
+- exporté.
+
+Créer un écran « Mes saisies » permettant :
+
+- de rechercher une action ;
+- de filtrer les saisies ;
+- d’ouvrir une action ;
+- de modifier une action ;
+- de dupliquer une action ;
+- de supprimer une action ;
+- de reprendre un brouillon ;
+- de voir si une action a déjà été exportée.
+
+Filtres :
+
+- délégation ;
+- mois ;
+- catégorie ;
+- activité ;
+- statut.
+
+Demander une confirmation avant toute suppression.
+
+Ajouter un bouton :
+
+« Effacer toutes les données locales »
+
+Ce bouton doit :
+
+- afficher un avertissement clair ;
+- nécessiter une confirmation explicite ;
+- préciser que la suppression est définitive sur cet appareil.
+
+==================================================
+17. DÉTECTION DES DOUBLONS
+==================================================
+
+Avant validation, comparer la saisie aux actions déjà enregistrées.
+
+Utiliser au minimum :
+
+- délégation ;
+- mois ;
+- code analytique ;
+- nom de l’action.
+
+Si un doublon potentiel est détecté :
+
+- afficher l’action existante ;
+- indiquer la date de saisie ;
+- proposer de consulter l’action ;
+- proposer de modifier l’action existante ;
+- permettre malgré tout l’enregistrement si l’utilisateur confirme que les actions sont distinctes.
+
+Ne pas bloquer définitivement la saisie.
+
+==================================================
+18. TABLEAU DE BORD
+==================================================
+
+Créer un tableau de bord dynamique à partir des saisies conservées dans localStorage.
+
+Afficher des indicateurs sous forme de cartes :
+
+- Nombre d’actions ;
+- Nombre de brouillons ;
+- Nombre de personnes touchées ;
+- Nombre de participations ;
+- Nombre de sessions ;
+- Nombre d’heures salariées ;
+- Nombre d’heures bénévoles ;
+- Nombre de partenaires ;
+- Nombre de retombées médiatiques.
+
+Ajouter des graphiques ou représentations visuelles pour :
+
+- actions par mois ;
+- actions par délégation ;
+- actions par catégorie ;
+- actions par activité ;
+- répartition entre mission sociale, politique et associative ;
+- évolution du nombre de personnes touchées ;
+- répartition des heures salariées et bénévoles.
+
+Ajouter des filtres :
+
+- année ;
+- mois ;
+- délégation ;
+- catégorie ;
+- activité ;
+- statut.
+
+Tous les indicateurs et graphiques doivent se recalculer lorsqu’un filtre est modifié.
+
+Ne pas compter automatiquement les champs vides comme des zéros lorsque cela modifierait l’interprétation des données.
+
+Afficher clairement lorsqu’un indicateur repose sur des données incomplètes.
+
+==================================================
+19. EXPORT EXCEL
+==================================================
+
+Créer un écran « Exporter les données ».
+
+L’utilisateur ne doit importer aucun fichier.
+
+L’application doit générer directement un nouveau fichier Excel à partir des saisies enregistrées.
+
+Prévoir les options suivantes :
+
+- exporter toutes les actions validées ;
+- exporter uniquement les actions non encore exportées ;
+- exporter les actions correspondant aux filtres actifs ;
+- exporter une période ;
+- exporter une délégation ;
+- inclure ou exclure les brouillons, avec exclusion par défaut.
+
+Le classeur généré doit contenir au minimum une feuille nommée :
+
+« import »
+
+Cette feuille doit contenir les 26 colonnes officielles dans l’ordre exact défini précédemment.
+
+Ajouter facultativement une feuille :
+
+« Synthèse »
+
+Cette feuille peut contenir :
+
+- nombre d’actions ;
+- période couverte ;
+- délégations concernées ;
+- principaux totaux ;
+- date et heure de génération.
+
+Ajouter facultativement une feuille :
+
+« Journal_export »
+
+Cette feuille peut contenir :
+
+- identifiant local ;
+- date de création ;
+- date de modification ;
+- date d’export ;
+- statut ;
+- délégation ;
+- mois ;
+- nom de l’action.
+
+Le fichier doit être nommé selon ce modèle :
+
+2026_ACTIVITE_TERRITOIRES_EXPORT_YYYY-MM-DD_HH-mm.xlsx
+
+Règles d’export :
+
+- ne jamais exporter undefined ;
+- ne jamais exporter null ;
+- ne jamais exporter NaN ;
+- utiliser une cellule vide lorsqu’une donnée facultative n’est pas renseignée ;
+- conserver les nombres comme des nombres ;
+- conserver les textes comme des textes ;
+- conserver les valeurs oui/non sous forme de texte conforme au modèle ;
+- respecter les accents ;
+- respecter l’ordre exact des colonnes ;
+- ne pas exporter les métadonnées locales dans la feuille « import » ;
+- échapper les contenus pouvant être interprétés comme des formules Excel lorsqu’ils proviennent d’une zone de texte libre ;
+- marquer localement les actions comme exportées après génération réussie du fichier.
+
+==================================================
+20. EXPORT DE SAUVEGARDE ET RÉIMPORT DES SAISIES
+==================================================
+
+L’utilisateur ne doit jamais importer le tableau Excel métier.
+
+Cependant, prévoir une fonction distincte de sauvegarde locale permettant :
+
+- d’exporter toutes les saisies dans un fichier JSON ;
+- de restaurer ultérieurement ce fichier JSON ;
+- de transférer les saisies d’un navigateur à un autre ;
+- de conserver les identifiants et les statuts ;
+- de contrôler la version du schéma avant restauration.
+
+Nom du fichier :
+
+SAUVEGARDE_SUIVI_ACTIVITE_YYYY-MM-DD.json
+
+Cette fonction doit être clairement distinguée de l’export Excel.
+
+Utiliser les libellés :
+
+- « Sauvegarder mes données »
+- « Restaurer une sauvegarde »
+
+Ne jamais utiliser le libellé :
+
+« Importer le fichier Excel »
+
+==================================================
+21. CONTRÔLES DE COHÉRENCE
+==================================================
+
+Mettre en place au minimum les contrôles suivants :
+
+- délégation obligatoire ;
+- mois obligatoire ;
+- activité obligatoire ;
+- code établissement déterminé ;
+- code analytique déterminé ;
+- catégorie renseignée lorsqu’elle est connue ;
+- nom officiel de l’action renseigné ;
+- valeurs numériques supérieures ou égales à zéro ;
+- somme SOCIALE + POLITIQUE + ASSOCIATIVE exactement égale à 1 ;
+- cohérence entre délégation et code établissement ;
+- cohérence entre action et code analytique ;
+- cohérence entre code analytique et catégorie ;
+- frais indirects au format attendu ;
+- aucun texte dans les champs numériques ;
+- aucune valeur JavaScript invalide ;
+- avertissement en cas de doublon ;
+- description protégée contre l’injection HTML ;
+- absence de formule Excel injectée depuis un champ libre.
+
+Les messages d’erreur doivent être formulés en français simple.
+
+Exemples :
+
+- « Sélectionnez votre délégation. »
+- « Indiquez le mois de réalisation. »
+- « Cette valeur ne peut pas être négative. »
+- « La répartition des missions doit atteindre 100 %. »
+- « Une saisie similaire existe déjà pour ce mois. »
+
+==================================================
+22. ACCESSIBILITÉ
+==================================================
+
+Respecter autant que possible les principes WCAG 2.1 niveau AA.
+
+Prévoir :
+
+- navigation complète au clavier ;
+- focus visible ;
+- labels reliés aux champs ;
+- contrastes suffisants ;
+- messages d’erreur associés aux champs concernés ;
+- titres de page et de section explicites ;
+- attributs ARIA lorsque nécessaires ;
+- structure HTML sémantique ;
+- boutons suffisamment grands ;
+- aucune information transmise uniquement par la couleur ;
+- aucun texte essentiel présent uniquement dans une icône ;
+- fonctionnement sur ordinateur, tablette et smartphone ;
+- langue principale définie en français ;
+- prise en compte de prefers-reduced-motion ;
+- possibilité d’agrandir le texte ;
+- compatibilité avec les lecteurs d’écran ;
+- conservation des données saisies lors du retour à l’étape précédente.
+
+Lorsqu’une erreur est détectée :
+
+- placer le focus sur le résumé des erreurs ;
+- permettre d’accéder directement au champ concerné ;
+- conserver les autres données déjà saisies.
+
+==================================================
+23. DESIGN
+==================================================
+
+Créer une interface :
+
+- moderne ;
+- chaleureuse ;
+- professionnelle ;
+- accessible ;
+- aérée ;
+- rassurante ;
+- inclusive ;
+- peu institutionnelle ;
+- simple pour un utilisateur non spécialiste.
+
+Utiliser une palette accessible inspirée de :
+
+- bleu pétrole ;
+- bleu clair ;
+- blanc ;
+- gris très clair ;
+- orange pour certains accents.
+
+Ne pas utiliser de logo propriétaire si aucune ressource graphique officielle n’est fournie.
+
+Prévoir :
+
+- grandes cartes ;
+- boutons explicites ;
+- pictogrammes simples ;
+- barre de progression ;
+- messages de réussite ;
+- infobulles ;
+- aides contextuelles ;
+- animations discrètes ;
+- interface responsive ;
+- mode d’impression du récapitulatif ;
+- état vide lorsqu’aucune action n’est enregistrée.
+
+Ne jamais reproduire visuellement le tableau Excel dans le formulaire.
+
+==================================================
+24. STRUCTURE DES FICHIERS
+==================================================
+
+Créer les fichiers suivants :
+
+- index.html
+- styles.css
+- app.js
+- config.js
+- delegations.js
+- actions.js
+- form-service.js
+- validation-service.js
+- storage-service.js
+- excel-service.js
+- dashboard-service.js
+- backup-service.js
+- security-service.js
+- tests.html
+- README.md
+- .gitignore
+
+Rôle des fichiers :
+
+index.html
+- structure sémantique ;
+- écrans ;
+- navigation ;
+- formulaires ;
+- récapitulatif ;
+- tableau de bord ;
+- dialogues accessibles.
+
+styles.css
+- identité visuelle ;
+- responsive design ;
+- accessibilité ;
+- focus ;
+- erreurs ;
+- réussites ;
+- cartes ;
+- impression.
+
+app.js
+- initialisation ;
+- état global ;
+- navigation ;
+- coordination des services.
+
+config.js
+- liste exacte des colonnes ;
+- options générales ;
+- année de référence ;
+- formats ;
+- règles métier configurables ;
+- valeurs oui/non ;
+- règles d’arrondi.
+
+delegations.js
+- liste des délégations ;
+- codes établissements ;
+- régions ;
+- statut actif ou inactif.
+
+actions.js
+- référentiel des activités ;
+- codes analytiques ;
+- catégories ;
+- missions ;
+- mots-clés ;
+- caractéristiques par défaut.
+
+form-service.js
+- assistant multi-étapes ;
+- affichage conditionnel ;
+- autocomplétion ;
+- préremplissage ;
+- récapitulatif.
+
+validation-service.js
+- champs obligatoires ;
+- nombres ;
+- cohérences ;
+- missions ;
+- doublons ;
+- messages d’erreur.
+
+storage-service.js
+- localStorage ;
+- brouillons ;
+- actions validées ;
+- préférences ;
+- statut exporté ;
+- migration des versions.
+
+excel-service.js
+- construction du classeur ;
+- création de la feuille « import » ;
+- respect des colonnes ;
+- nettoyage des valeurs ;
+- génération du fichier.
+
+dashboard-service.js
+- calcul des indicateurs ;
+- filtres ;
+- regroupements ;
+- affichage des graphiques ;
+- données manquantes.
+
+backup-service.js
+- export JSON ;
+- restauration JSON ;
+- contrôle de version ;
+- prévention des doublons lors de la restauration.
+
+security-service.js
+- échappement HTML ;
+- nettoyage des contenus ;
+- protection contre l’injection ;
+- protection contre les formules Excel provenant de champs libres.
+
+tests.html
+- tests unitaires simples ;
+- tests manuels ;
+- rapport lisible dans le navigateur.
+
+README.md
+- présentation ;
+- installation ;
+- configuration ;
+- ajout des référentiels ;
+- publication GitHub Pages ;
+- utilisation ;
+- sauvegarde ;
+- export ;
+- confidentialité ;
+- limites.
+
+==================================================
+25. TESTS À PRÉVOIR
+==================================================
+
+Créer une page tests.html permettant de lancer et visualiser les tests.
+
+Tester au minimum :
+
+1. Chargement de la liste des délégations.
+2. Chargement du référentiel des activités.
+3. Recherche d’une activité par nom.
+4. Recherche d’une activité par mot-clé.
+5. Remplissage automatique du code établissement.
+6. Remplissage automatique du code analytique.
+7. Remplissage automatique de la catégorie.
+8. Remplissage automatique des missions.
+9. Conservation des données entre deux étapes.
+10. Validation des nombres.
+11. Refus des nombres négatifs.
+12. Distinction entre zéro et champ vide.
+13. Somme correcte des missions.
+14. Correction des imprécisions décimales.
+15. Enregistrement d’un brouillon.
+16. Reprise d’un brouillon.
+17. Modification d’une action.
+18. Duplication d’une action.
+19. Suppression d’une action.
+20. Détection d’un doublon.
+21. Filtrage des saisies.
+22. Calcul des indicateurs.
+23. Export Excel des actions validées.
+24. Respect des 26 colonnes.
+25. Respect de l’ordre des colonnes.
+26. Absence de undefined.
+27. Absence de null.
+28. Absence de NaN.
+29. Protection contre une formule Excel insérée dans un commentaire.
+30. Export JSON de sauvegarde.
+31. Restauration JSON.
+32. Rejet d’une sauvegarde invalide.
+33. Navigation complète au clavier.
+34. Affichage sur smartphone.
+35. Fonctionnement sans connexion après chargement des bibliothèques locales.
+
+==================================================
+26. LIVRABLE ATTENDU
+==================================================
+
+Génère le projet complet.
+
+Ne fournis pas :
+
+- une simple maquette ;
+- du pseudo-code ;
+- un exemple partiel ;
+- une description générale ;
+- uniquement le fichier index.html.
+
+Fournis du code complet et fonctionnel.
+
+Commence par afficher l’arborescence du projet.
+
+Donne ensuite le contenu intégral de chaque fichier dans un bloc de code séparé.
+
+Le projet doit être utilisable après :
+
+1. création d’un repository GitHub ;
+2. ajout des fichiers ;
+3. activation de GitHub Pages.
+
+Le projet doit fonctionner sans import préalable d’un fichier Excel.
+
+Les référentiels doivent être chargés depuis les fichiers JavaScript locaux.
+
+L’utilisateur doit pouvoir :
+
+- ouvrir la page ;
+- saisir une activité ;
+- enregistrer plusieurs actions ;
+- retrouver ses saisies ;
+- consulter un tableau de bord ;
+- exporter les données au format Excel.
+
+Lorsque les données de référence sont incomplètes ou ambiguës :
+
+- ne rien inventer ;
+- utiliser une constante configurable ;
+- ajouter un commentaire « À valider » ;
+- documenter la modification à réaliser dans README.md.
+
+==================================================
+27. DOCUMENTATION FINALE À FOURNIR
+==================================================
+
+À la fin de ta réponse, fournir :
+
+1. les étapes exactes pour créer le repository GitHub ;
+2. les étapes exactes pour déposer les fichiers ;
+3. les étapes exactes pour activer GitHub Pages ;
+4. la procédure de mise à jour des délégations ;
+5. la procédure de mise à jour des activités ;
+6. la procédure de test ;
+7. la procédure d’export Excel ;
+8. la procédure de sauvegarde JSON ;
+9. les limites techniques de localStorage ;
+10. les limites d’une application statique ;
+11. les recommandations de confidentialité ;
+12. les évolutions possibles vers Microsoft Lists, SharePoint, Power Automate ou une base centralisée.
+
+==================================================
+28. RÈGLE FINALE ABSOLUE
+==================================================
+
+Ne demande jamais à l’utilisateur d’importer le fichier Excel de suivi d’activité.
+
+Le fichier Excel n’est pas l’outil de saisie.
+
+La page HTML est l’outil de saisie.
+
+Excel est uniquement le format d’export final.
+
+Les données techniques doivent être remplies automatiquement à partir des référentiels intégrés dans l’application.
